@@ -1,0 +1,38 @@
+@AINews_HostAddress = http://localhost:5254
+
+### Register
+POST {{AINews_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "fullName": "Ada Lovelace",
+  "email": "ada@example.com",
+  "password": "Password123"
+}
+
+### Login
+POST {{AINews_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "ada@example.com",
+  "password": "Password123"
+}
+
+### List interests
+GET {{AINews_HostAddress}}/api/interests
+Accept: application/json
+
+### List published articles
+GET {{AINews_HostAddress}}/api/articles?pageNumber=1&pageSize=20
+Accept: application/json
+
+### List AI tools (today's spotlight)
+GET {{AINews_HostAddress}}/api/ai-tools?featuredOnly=true
+Accept: application/json
+
+### Get my profile (replace {{token}} with an access token from /api/auth/login)
+GET {{AINews_HostAddress}}/api/me
+Authorization: Bearer {{token}}
+
+###

@@ -1,0 +1,50 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: ainews-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ainews
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ainews-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: ainews-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  api:
+    build:
+      context: .
+      dockerfile: src/AINews.API/Dockerfile
+    container_name: ainews-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: 8080
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=ainews;Username=postgres;Password=postgres"
+      ConnectionStrings__Redis: "redis:6379"
+      Jwt__Secret: "dev-only-secret-do-not-use-in-production-32chars-min"
+    ports:
+      - "8080:8080"
+
+volumes:
+  ainews-postgres-data:
