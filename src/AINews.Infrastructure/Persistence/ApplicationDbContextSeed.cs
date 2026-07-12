@@ -3,18 +3,25 @@ using AINews.Domain.Enums;
 using AINews.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace AINews.Infrastructure.Persistence;
 
 /// <summary>
 /// Seeds the roles the app depends on (so RegisterCommandHandler's
 /// AddToRoleAsync("User") never fails on a fresh database) plus a starter set
-/// of Interests/Categories matching the product plan's content pillars.
-/// Safe to run repeatedly — every step checks for existing data first.
+/// of Interests/Categories matching the product plan's content pillars, plus
+/// a single designated Admin account driven by config (see AdminSeed section
+/// in appsettings). Safe to run repeatedly — every step checks for existing
+/// data first, and the admin account is only ever created once (by email).
 /// </summary>
 public static class ApplicationDbContextSeed
 {
-    public static async Task SeedAsync(ApplicationDbContext context, RoleManager<ApplicationRole> roleManager)
+    public static async Task SeedAsync(
+        ApplicationDbContext context,
+        RoleManager<ApplicationRole> roleManager,
+        UserManager<ApplicationUser> userManager,
+        IConfiguration configuration)
     {
         foreach (var role in new[] { "Admin", "User" })
         {
@@ -47,5 +54,51 @@ public static class ApplicationDbContextSeed
         }
 
         await context.SaveChangesAsync();
+
+        await SeedAdminUserAsync(userManager, configuration);
+    }
+
+    private static async Task SeedAdminUserAsync(UserManager<ApplicationUser> userManager, IConfiguration configuration)
+    {
+        var email = configuration["AdminSeed:Email"];
+        var password = configuration["AdminSeed:Password"];
+
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+        {
+            // Nothing configured — skip silently, this is optional.
+            return;
+        }
+
+        var existing = await userManager.FindByEmailAsync(email);
+        if (existing is not null)
+        {
+            // Already seeded on a previous run. Make sure it's Admin-only
+            // (not also User) so role selection never has to guess between
+            // two roles the way the manual-SQL approach could end up with.
+            var currentRoles = await userManager.GetRolesAsync(existing);
+            if (!currentRoles.Contains("Admin"))
+            {
+                await userManager.AddToRoleAsync(existing, "Admin");
+            }
+            foreach (var extraRole in currentRoles.Where(r => r != "Admin"))
+            {
+                await userManager.RemoveFromRoleAsync(existing, extraRole);
+            }
+            return;
+        }
+
+        var adminUser = new ApplicationUser
+        {
+            UserName = email,
+            Email = email,
+            FullName = "Admin",
+            EmailConfirmed = true
+        };
+
+        var result = await userManager.CreateAsync(adminUser, password);
+        if (result.Succeeded)
+        {
+            await userManager.AddToRoleAsync(adminUser, "Admin");
+        }
     }
 }

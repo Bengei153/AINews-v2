@@ -51,7 +51,7 @@ public class IdentityService : IIdentityService
         }
 
         var roles = await _userManager.GetRolesAsync(user);
-        var role = roles.FirstOrDefault() ?? DefaultRole;
+        var role = roles.Contains("Admin") ? "Admin" : (roles.FirstOrDefault() ?? DefaultRole);
 
         return (true, user.Id, user.FullName, role);
     }

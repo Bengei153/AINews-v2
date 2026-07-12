@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using AINews.Application.Content.NewsIngestion.Commands.RunNewsIngestion;
+using MediatR;
+using Microsoft.Extensions.Options;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -111,8 +114,19 @@ if (app.Environment.IsDevelopment())
     await db.Database.MigrateAsync();
 
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<AINews.Infrastructure.Identity.ApplicationRole>>();
-    await ApplicationDbContextSeed.SeedAsync(db, roleManager);
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AINews.Infrastructure.Identity.ApplicationUser>>();
+    await ApplicationDbContextSeed.SeedAsync(db, roleManager, userManager, builder.Configuration);
 }
+
+// Recurring job: News Collector + AI Summarizer pipeline. Schedule comes
+// from NewsIngestion:CronSchedule in appsettings (default: 7am daily).
+// You can also trigger it on demand via POST /api/articles/ingest-news, or
+// click "Trigger now" for this job on the /jobs dashboard.
+var newsIngestionSettings = app.Services.GetRequiredService<IOptions<AINews.Infrastructure.Services.NewsIngestionSettings>>().Value;
+RecurringJob.AddOrUpdate<ISender>(
+    "news-ingestion",
+    sender => sender.Send(new RunNewsIngestionCommand(), CancellationToken.None),
+    newsIngestionSettings.CronSchedule);
 
 app.Run();
 

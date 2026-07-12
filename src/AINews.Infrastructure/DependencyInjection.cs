@@ -72,6 +72,22 @@ public static class DependencyInjection
         services.Configure<SmtpSettings>(configuration.GetSection(SmtpSettings.SectionName));
         services.AddScoped<IEmailService, EmailService>();
 
+        // News ingestion pipeline (News Collector + AI Summarizer from the
+        // product plan). Each gets its own named HttpClient so timeouts/base
+        // addresses don't collide with anything else in the app.
+        services.Configure<AnthropicSettings>(configuration.GetSection(AnthropicSettings.SectionName));
+        services.AddHttpClient<IAiContentService, AnthropicContentService>(client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(60);
+        });
+
+        services.Configure<NewsIngestionSettings>(configuration.GetSection(NewsIngestionSettings.SectionName));
+        services.AddHttpClient<INewsSourceService, RssNewsSourceService>(client =>
+        {
+            client.Timeout = TimeSpan.FromSeconds(30);
+            client.DefaultRequestHeaders.Add("User-Agent", "AINews/1.0 (+https://aibrief.example.com)");
+        });
+
         // Redis distributed cache — used later for caching hot reads (homepage
         // feed, tool-of-the-day) once traffic makes it worthwhile.
         var redisConnectionString = configuration.GetConnectionString("Redis");
