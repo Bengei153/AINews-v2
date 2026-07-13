@@ -107,9 +107,8 @@ app.MapHangfireDashboard("/jobs", new DashboardOptions
 // Apply pending EF Core migrations automatically on startup in Development
 // so `docker compose up` gives you a ready-to-use database. In production,
 // prefer running migrations as an explicit deploy step.
-if (app.Environment.IsDevelopment())
+using (var scope = app.Services.CreateScope())
 {
-    using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     await db.Database.MigrateAsync();
 
