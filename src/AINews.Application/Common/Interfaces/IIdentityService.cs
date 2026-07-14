@@ -58,3 +58,14 @@ public interface IEmailService
 {
     Task SendAsync(string toEmail, string subject, string htmlBody, CancellationToken cancellationToken = default);
 }
+
+/// <summary>
+/// Builds links that point at the frontend app (not the API) for use inside
+/// emails — e.g. an article URL the reader clicks, or the one-click
+/// unsubscribe link. Backed by a single configured frontend base URL.
+/// </summary>
+public interface IFrontendLinkBuilder
+{
+    string ArticleUrl(string slug);
+    string UnsubscribeUrl(Guid unsubscribeToken);
+}

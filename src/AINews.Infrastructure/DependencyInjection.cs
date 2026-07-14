@@ -72,6 +72,9 @@ public static class DependencyInjection
         services.Configure<SmtpSettings>(configuration.GetSection(SmtpSettings.SectionName));
         services.AddScoped<IEmailService, EmailService>();
 
+        services.Configure<FrontendSettings>(configuration.GetSection(FrontendSettings.SectionName));
+        services.AddScoped<IFrontendLinkBuilder, FrontendLinkBuilder>();
+
         // News ingestion pipeline (News Collector + AI Summarizer from the
         // product plan). Each gets its own named HttpClient so timeouts/base
         // addresses don't collide with anything else in the app.

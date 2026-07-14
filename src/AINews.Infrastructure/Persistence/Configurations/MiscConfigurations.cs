@@ -45,9 +45,27 @@ public class NewsletterIssueConfiguration : IEntityTypeConfiguration<NewsletterI
         builder.HasKey(n => n.Id);
         builder.Property(n => n.Subject).IsRequired().HasMaxLength(300);
 
-        // ArticleIds is a Phase 4 stub (Newsletter service not built out yet);
-        // not persisted until that feature gets a proper join table.
+        // ArticleIds is exposed as a get-only IReadOnlyCollection backed by a
+        // private List<Guid> field. Map that field directly to a Postgres
+        // uuid[] array column (Npgsql supports primitive collections
+        // natively) — EF binds "_articleIds" to the real CLR field of that
+        // name rather than creating a true shadow property, since one exists.
+        // The public read-only property itself is excluded from mapping to
+        // avoid EF trying to map both the field and the property.
         builder.Ignore(n => n.ArticleIds);
+        builder.Property<List<Guid>>("_articleIds").HasColumnName("ArticleIds");
+    }
+}
+
+public class NewsletterSubscriberConfiguration : IEntityTypeConfiguration<NewsletterSubscriber>
+{
+    public void Configure(EntityTypeBuilder<NewsletterSubscriber> builder)
+    {
+        builder.ToTable("NewsletterSubscribers");
+        builder.HasKey(s => s.Id);
+        builder.Property(s => s.Email).IsRequired().HasMaxLength(256);
+        builder.HasIndex(s => s.Email).IsUnique();
+        builder.HasIndex(s => s.UnsubscribeToken).IsUnique();
     }
 }
 

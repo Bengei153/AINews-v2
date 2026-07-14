@@ -40,6 +40,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     public DbSet<AITool> AITools => Set<AITool>();
     public DbSet<Bookmark> Bookmarks => Set<Bookmark>();
     public DbSet<NewsletterIssue> NewsletterIssues => Set<NewsletterIssue>();
+    public DbSet<NewsletterSubscriber> NewsletterSubscribers => Set<NewsletterSubscriber>();
     public DbSet<RefreshTokenEntity> RefreshTokens => Set<RefreshTokenEntity>();
 
     protected override void OnModelCreating(ModelBuilder builder)

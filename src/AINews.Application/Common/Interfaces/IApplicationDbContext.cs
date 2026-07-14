@@ -19,6 +19,7 @@ public interface IApplicationDbContext
     DbSet<AITool> AITools { get; }
     DbSet<Bookmark> Bookmarks { get; }
     DbSet<NewsletterIssue> NewsletterIssues { get; }
+    DbSet<NewsletterSubscriber> NewsletterSubscribers { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
