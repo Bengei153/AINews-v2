@@ -29,7 +29,16 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        // Serialize/deserialize all enums (ContentPillar, ArticleStatus,
+        // ArticleSourceType, etc.) as their string names, not numbers.
+        // Every frontend type assumes strings ("AIForStudents", "Published",
+        // ...) — without this, System.Text.Json defaults to raw ints, which
+        // silently breaks any frontend code that expects a string.
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+    });
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(options =>
