@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace AINews.Application.Common.Interfaces;
 
 /// <summary>A single unprocessed item pulled from a news source, before AI summarization.</summary>
-public record RawNewsItem(string Title, string? Summary, string Content, string SourceUrl, string SourceName, DateTimeOffset PublishedOn);
+public record RawNewsItem(string Title, string? Summary, string Content, string SourceUrl, string SourceName, DateTimeOffset PublishedOn, string? ImageUrl = null);
 
 /// <summary>
 /// Fetches candidate news items to consider for ingestion. Implemented by

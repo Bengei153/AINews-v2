@@ -22,7 +22,8 @@ public record ArticleSummaryDto(
     ContentPillar Pillar,
     string CategoryName,
     int ReadTimeMinutes,
-    DateTimeOffset? PublishedOn);
+    DateTimeOffset? PublishedOn,
+    string? CoverImageUrl);
 
 public class GetArticlesQueryHandler : IRequestHandler<GetArticlesQuery, PaginatedList<ArticleSummaryDto>>
 {
@@ -51,7 +52,7 @@ public class GetArticlesQueryHandler : IRequestHandler<GetArticlesQuery, Paginat
         var projected = query
             .OrderByDescending(a => a.PublishedOn)
             .Select(a => new ArticleSummaryDto(
-                a.Id, a.Title, a.Slug, a.Summary, a.Pillar, a.Category.Name, a.ReadTimeMinutes, a.PublishedOn));
+                a.Id, a.Title, a.Slug, a.Summary, a.Pillar, a.Category.Name, a.ReadTimeMinutes, a.PublishedOn, a.CoverImageUrl));
 
         return PaginatedList<ArticleSummaryDto>.CreateAsync(projected, request.PageNumber, request.PageSize);
     }

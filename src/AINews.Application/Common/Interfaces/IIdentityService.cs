@@ -68,4 +68,14 @@ public interface IFrontendLinkBuilder
 {
     string ArticleUrl(string slug);
     string UnsubscribeUrl(Guid unsubscribeToken);
+    string HomeUrl();
+
+    /// <summary>
+    /// The link to actually hand out for sharing (newsletter, copy-link
+    /// button). Points at the backend's own /share/articles/{slug} route,
+    /// which serves real og:* meta tags for crawlers before redirecting
+    /// humans to ArticleUrl — see NewsletterController-adjacent
+    /// ShareController for why this indirection exists.
+    /// </summary>
+    string ShareUrl(string slug);
 }

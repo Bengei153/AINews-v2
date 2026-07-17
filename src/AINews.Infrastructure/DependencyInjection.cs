@@ -73,6 +73,7 @@ public static class DependencyInjection
         services.AddScoped<IEmailService, EmailService>();
 
         services.Configure<FrontendSettings>(configuration.GetSection(FrontendSettings.SectionName));
+        services.Configure<ApiSettings>(configuration.GetSection(ApiSettings.SectionName));
         services.AddScoped<IFrontendLinkBuilder, FrontendLinkBuilder>();
 
         // News ingestion pipeline (News Collector + AI Summarizer from the

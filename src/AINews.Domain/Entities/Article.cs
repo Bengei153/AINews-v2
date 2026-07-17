@@ -25,6 +25,10 @@ public class Article : BaseAuditableEntity
     public string? SourceName { get; private set; }
     public ArticleSourceType SourceType { get; private set; } = ArticleSourceType.Original;
 
+    /// <summary>Image shown on article cards, the article page, and link-share
+    /// previews (og:image). Optional — falls back to a site default when unset.</summary>
+    public string? CoverImageUrl { get; private set; }
+
     public ContentPillar Pillar { get; private set; }
     public ArticleStatus Status { get; private set; } = ArticleStatus.Draft;
 
@@ -52,7 +56,8 @@ public class Article : BaseAuditableEntity
         Guid? authorId,
         ArticleSourceType sourceType = ArticleSourceType.Original,
         string? sourceUrl = null,
-        string? sourceName = null)
+        string? sourceName = null,
+        string? coverImageUrl = null)
     {
         if (string.IsNullOrWhiteSpace(title))
             throw new DomainException("Article title is required.");
@@ -71,12 +76,15 @@ public class Article : BaseAuditableEntity
             SourceType = sourceType,
             SourceUrl = sourceUrl,
             SourceName = sourceName,
+            CoverImageUrl = coverImageUrl,
             Status = ArticleStatus.Draft,
             ReadTimeMinutes = EstimateReadTime(body)
         };
 
         return article;
     }
+
+    public void SetCoverImage(string? coverImageUrl) => CoverImageUrl = coverImageUrl;
 
     public void UpdateContent(string title, string slug, string summary, string body, ContentPillar pillar, Guid categoryId)
     {

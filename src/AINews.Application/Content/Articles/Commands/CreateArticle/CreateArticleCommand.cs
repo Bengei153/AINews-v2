@@ -17,7 +17,8 @@ public record CreateArticleCommand(
     List<Guid>? TagIds,
     ArticleSourceType SourceType,
     string? SourceUrl,
-    string? SourceName) : IRequest<Guid>;
+    string? SourceName,
+    string? CoverImageUrl = null) : IRequest<Guid>;
 
 public class CreateArticleCommandValidator : AbstractValidator<CreateArticleCommand>
 {
@@ -61,7 +62,8 @@ public class CreateArticleCommandHandler : IRequestHandler<CreateArticleCommand,
             _currentUser.UserId,
             request.SourceType,
             request.SourceUrl,
-            request.SourceName);
+            request.SourceName,
+            request.CoverImageUrl);
 
         foreach (var tagId in request.TagIds ?? new List<Guid>())
         {

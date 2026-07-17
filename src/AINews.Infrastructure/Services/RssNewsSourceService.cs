@@ -57,6 +57,13 @@ public class RssNewsSourceService : INewsSourceService
                     var summary = feedItem.Summary?.Text ?? string.Empty;
                     var content = (feedItem.Content as TextSyndicationContent)?.Text ?? summary;
 
+                    // Many feeds attach a cover image as an "enclosure" link
+                    // with an image MIME type. Not every feed has this — it's
+                    // a nice-to-have, not something to rely on.
+                    var imageUrl = feedItem.Links
+                        .FirstOrDefault(l => l.RelationshipType == "enclosure" && l.MediaType?.StartsWith("image/") == true)
+                        ?.Uri?.ToString();
+
                     results.Add(new RawNewsItem(
                         Title: feedItem.Title?.Text ?? "(untitled)",
                         Summary: summary,
@@ -65,7 +72,8 @@ public class RssNewsSourceService : INewsSourceService
                         SourceName: sourceName,
                         PublishedOn: feedItem.PublishDate.UtcDateTime == default
                             ? DateTimeOffset.UtcNow
-                            : feedItem.PublishDate));
+                            : feedItem.PublishDate,
+                        ImageUrl: imageUrl));
                 }
             }
             catch (Exception ex)

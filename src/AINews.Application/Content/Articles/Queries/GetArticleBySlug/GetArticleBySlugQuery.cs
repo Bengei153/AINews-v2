@@ -21,6 +21,7 @@ public record ArticleDetailDto(
     DateTimeOffset? PublishedOn,
     string? SourceName,
     string? SourceUrl,
+    string? CoverImageUrl,
     List<string> Tags);
 
 public class GetArticleBySlugQueryHandler : IRequestHandler<GetArticleBySlugQuery, ArticleDetailDto>
@@ -53,6 +54,7 @@ public class GetArticleBySlugQueryHandler : IRequestHandler<GetArticleBySlugQuer
             article.PublishedOn,
             article.SourceName,
             article.SourceUrl,
+            article.CoverImageUrl,
             article.ArticleTags.Select(at => at.Tag.Name).ToList());
     }
 }

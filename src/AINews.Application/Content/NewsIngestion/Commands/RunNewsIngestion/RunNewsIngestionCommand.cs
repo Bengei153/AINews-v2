@@ -87,7 +87,8 @@ public class RunNewsIngestionCommandHandler : IRequestHandler<RunNewsIngestionCo
                     authorId: null, // AI-generated draft, no human author yet
                     sourceType: ArticleSourceType.AIGenerated,
                     sourceUrl: item.SourceUrl,
-                    sourceName: item.SourceName);
+                    sourceName: item.SourceName,
+                    coverImageUrl: item.ImageUrl);
 
                 _context.Articles.Add(article);
                 created++;

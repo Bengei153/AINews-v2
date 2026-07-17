@@ -17,6 +17,7 @@ public record DraftArticleDto(
     string SourceType,
     string? SourceName,
     string? SourceUrl,
+    string? CoverImageUrl,
     DateTimeOffset Created);
 
 public class GetDraftArticlesQueryHandler : IRequestHandler<GetDraftArticlesQuery, List<DraftArticleDto>>
@@ -32,7 +33,7 @@ public class GetDraftArticlesQueryHandler : IRequestHandler<GetDraftArticlesQuer
             .OrderByDescending(a => a.Created)
             .Select(a => new DraftArticleDto(
                 a.Id, a.Title, a.Summary, a.Category.Name, a.Pillar, a.Status,
-                a.SourceType.ToString(), a.SourceName, a.SourceUrl, a.Created))
+                a.SourceType.ToString(), a.SourceName, a.SourceUrl, a.CoverImageUrl, a.Created))
             .ToListAsync(cancellationToken);
     }
 }
